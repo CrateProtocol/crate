@@ -1,9 +1,9 @@
 import { PublicKey } from "@solana/web3.js";
 
 export const CRATE_TOKEN_PROGRAM_ID = new PublicKey(
-  "CRAToQ6Ycrxp6ei3VBcdi8oRxETkwDJZxRu6ziCFGD5a"
+  "CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs"
 );
 
 export const CRATE_FEE_OWNER = new PublicKey(
-  "2ddvVUH6fmZoifqEAwQ31EBUXy5CHgpk9wWbvkBgsfdT"
+  "AAqAKWdsUPepSgXf7Msbp1pQ7yCPgYkBvXmNfTFBGAqp"
 );

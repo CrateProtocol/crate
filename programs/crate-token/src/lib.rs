@@ -16,12 +16,12 @@ use vipers::{assert_keys, invariant, unwrap_int};
 use events::*;
 use state::*;
 
-declare_id!("CRAToQ6Ycrxp6ei3VBcdi8oRxETkwDJZxRu6ziCFGD5a");
+declare_id!("CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs");
 
 /// Address where fees are sent to.
 pub mod fee_to_address {
     use anchor_lang::declare_id;
-    declare_id!("2ddvVUH6fmZoifqEAwQ31EBUXy5CHgpk9wWbvkBgsfdT");
+    declare_id!("AAqAKWdsUPepSgXf7Msbp1pQ7yCPgYkBvXmNfTFBGAqp");
 }
 
 /// Address where fees are sent to.
@@ -290,6 +290,6 @@ mod tests {
     fn test_fee_to_address() {
         let (key, bump) = Pubkey::find_program_address(&[b"CrateFees"], &crate::ID);
         assert_eq!(key, FEE_TO_ADDRESS);
-        assert_eq!(bump, 253);
+        assert_eq!(bump, 254);
     }
 }
