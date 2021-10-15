@@ -1,6 +1,6 @@
 [package]
 name = "crate-token"
-version = "0.1.0"
+version = "0.1.1"
 description = "Fractional ownership of a basket of fungible assets."
 edition = "2018"
 homepage = "https://crate.so"
