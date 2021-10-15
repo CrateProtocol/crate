@@ -1,0 +1,13 @@
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "localnet"
+wallet = "tests/fixture-key.json"
+
+[scripts]
+test = "yarn mocha"
+
+[[test.genesis]]
+address = "CRAToQ6Ycrxp6ei3VBcdi8oRxETkwDJZxRu6ziCFGD5a"
+program = "./target/deploy/crate_token.so"

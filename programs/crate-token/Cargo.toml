@@ -1,0 +1,26 @@
+[package]
+name = "crate-token"
+version = "0.1.0"
+description = "Fractional ownership of a basket of fungible assets."
+edition = "2018"
+homepage = "https://crate.so"
+repository = "https://github.com/CrateProtocol/crate"
+authors = ["Jen Zhang <jen@crate.so>"]
+license = "AGPL-3.0"
+keywords = ["solana", "crate"]
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "crate_token"
+
+[features]
+no-entrypoint = []
+no-idl = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.17.0"
+anchor-spl = "0.17.0"
+vipers = "1.2.1"
+num-traits = "0.2"
