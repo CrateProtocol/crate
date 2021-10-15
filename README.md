@@ -29,7 +29,7 @@ We're in active development. For the latest updates, please join our community:
 
 Program addresses are the same on devnet, testnet, and mainnet-beta.
 
-- Crate: [`CRAToQ6Ycrxp6ei3VBcdi8oRxETkwDJZxRu6ziCFGD5a`](https://explorer.solana.com/address/CRAToQ6Ycrxp6ei3VBcdi8oRxETkwDJZxRu6ziCFGD5a)
+- Crate: [`CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs`](https://explorer.solana.com/address/CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs)
 
 ## Contribution
 
