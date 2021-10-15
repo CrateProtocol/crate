@@ -13,3 +13,15 @@ test = "yarn mocha"
 [[test.genesis]]
 address = "CRAToQ6Ycrxp6ei3VBcdi8oRxETkwDJZxRu6ziCFGD5a"
 program = "./target/deploy/crate_token.so"
+
+[programs.mainnet]
+crate_token = "CRAToQ6Ycrxp6ei3VBcdi8oRxETkwDJZxRu6ziCFGD5a"
+
+[programs.devnet]
+crate_token = "CRAToQ6Ycrxp6ei3VBcdi8oRxETkwDJZxRu6ziCFGD5a"
+
+[programs.testnet]
+crate_token = "CRAToQ6Ycrxp6ei3VBcdi8oRxETkwDJZxRu6ziCFGD5a"
+
+[programs.localnet]
+crate_token = "CRAToQ6Ycrxp6ei3VBcdi8oRxETkwDJZxRu6ziCFGD5a"
