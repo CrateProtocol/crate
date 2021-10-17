@@ -17,6 +17,7 @@ use events::*;
 
 declare_id!("1NKyU3qShZC3oJgvCCftAHDi5TFxcJwfyUz2FeZsiwE");
 
+/// Withdraw authority address.
 mod withdraw_authority {
     use anchor_lang::declare_id;
 

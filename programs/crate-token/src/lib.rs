@@ -18,7 +18,7 @@ pub use state::*;
 declare_id!("CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs");
 
 /// Address where fees are sent to.
-pub mod fee_to_address {
+mod fee_to_address {
     use anchor_lang::declare_id;
     declare_id!("AAqAKWdsUPepSgXf7Msbp1pQ7yCPgYkBvXmNfTFBGAqp");
 }
