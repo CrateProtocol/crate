@@ -3,7 +3,7 @@ import { chaiSolana } from "@saberhq/chai-solana";
 import { SolanaProvider } from "@saberhq/solana-contrib";
 import chai from "chai";
 
-import { CrateTokenSDK } from "../src";
+import { CrateSDK } from "../src";
 
 chai.use(chaiSolana);
 
@@ -16,6 +16,6 @@ const provider = SolanaProvider.load({
   opts: anchorProvider.opts,
 });
 
-export const makeSDK = (): CrateTokenSDK => {
-  return CrateTokenSDK.init(provider);
+export const makeSDK = (): CrateSDK => {
+  return CrateSDK.init(provider);
 };

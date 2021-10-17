@@ -10,18 +10,18 @@ wallet = "tests/fixture-key.json"
 [scripts]
 test = "yarn mocha"
 
-[[test.genesis]]
-address = "CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs"
-program = "./target/deploy/crate_token.so"
-
 [programs.mainnet]
 crate_token = "CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs"
+crate_redeem_in_kind = "1NKyU3qShZC3oJgvCCftAHDi5TFxcJwfyUz2FeZsiwE"
 
 [programs.devnet]
 crate_token = "CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs"
+crate_redeem_in_kind = "1NKyU3qShZC3oJgvCCftAHDi5TFxcJwfyUz2FeZsiwE"
 
 [programs.testnet]
 crate_token = "CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs"
+crate_redeem_in_kind = "1NKyU3qShZC3oJgvCCftAHDi5TFxcJwfyUz2FeZsiwE"
 
 [programs.localnet]
 crate_token = "CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs"
+crate_redeem_in_kind = "1NKyU3qShZC3oJgvCCftAHDi5TFxcJwfyUz2FeZsiwE"

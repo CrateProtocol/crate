@@ -20,7 +20,7 @@ import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { expect } from "chai";
 import invariant from "tiny-invariant";
 
-import type { CrateTokenSDK } from "../src";
+import type { CrateSDK } from "../src";
 import { CRATE_FEE_OWNER } from "../src/constants";
 import { makeSDK } from "./workspace";
 
@@ -31,12 +31,12 @@ describe("crate-token", () => {
   let crateToken: Token;
 
   let crateKey: PublicKey;
-  let otherSDK: CrateTokenSDK;
+  let otherSDK: CrateSDK;
   let otherAccount: PublicKey;
 
   const makeUser = async (): Promise<{
     kp: Keypair;
-    sdk: CrateTokenSDK;
+    sdk: CrateSDK;
     tokenAccount: PublicKey;
   }> => {
     const kp = Keypair.generate();
@@ -72,6 +72,11 @@ describe("crate-token", () => {
     });
     crateKey = theCrateKey;
     await expectTX(createTX, "Create Crate Token").to.be.fulfilled;
+
+    await expectTX(
+      sdk.setWithdrawFee(theCrateKey, 1),
+      "Set withdraw fee to 0.01%"
+    ).to.be.fulfilled;
 
     const other = await makeUser();
     otherSDK = other.sdk;

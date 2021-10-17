@@ -9,6 +9,8 @@ pub struct NewCrateEvent {
     pub crate_key: Pubkey,
     #[index]
     pub issue_authority: Pubkey,
+    #[index]
+    pub withdraw_authority: Pubkey,
 }
 
 /// Emitted when crate tokens are issued.
@@ -18,13 +20,18 @@ pub struct IssueEvent {
     pub crate_key: Pubkey,
     pub destination: Pubkey,
     pub amount: u64,
+    pub author_fee: u64,
+    pub protocol_fee: u64,
 }
 
-/// Emitted when crate tokens are redeemed.
+/// Emitted when crate tokens are withdrawn.
 #[event]
-pub struct RedeemEvent {
+pub struct WithdrawEvent {
     #[index]
     pub crate_key: Pubkey,
-    pub source: Pubkey,
+    pub token: Pubkey,
+    pub destination: Pubkey,
     pub amount: u64,
+    pub author_fee: u64,
+    pub protocol_fee: u64,
 }

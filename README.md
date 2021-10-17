@@ -20,16 +20,18 @@ We're in active development. For the latest updates, please join our community:
 
 ## Packages
 
-| Package                    | Description                                          | Version                                                                                                                     | Docs                                                                                 |
-| :------------------------- | :--------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------- |
-| `crate-token`              | Fractional ownership of a basket of fungible assets. | [![Crates.io](https://img.shields.io/crates/v/crate-token)](https://crates.io/crates/crate-token)                           | [![Docs.rs](https://docs.rs/crate-token/badge.svg)](https://docs.rs/crate-token)     |
-| `@crateprotocol/crate-sdk` | TypeScript SDK for Crate                             | [![npm](https://img.shields.io/npm/v/@crateprotocol/crate-sdk.svg)](https://www.npmjs.com/package/@crateprotocol/crate-sdk) | [![Docs](https://img.shields.io/badge/docs-typedoc-blue)](https://docs.crate.so/ts/) |
+| Package                    | Description                                       | Version                                                                                                                     | Docs                                                                                               |
+| :------------------------- | :------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- |
+| `crate-redeem-in-kind`     | In-kind distributions for redeeming Crate assets. | [![Crates.io](https://img.shields.io/crates/v/crate-redeem-in-kind)](https://crates.io/crates/crate-redeem-in-kind)         | [![Docs.rs](https://docs.rs/crate-redeem-in-kind/badge.svg)](https://docs.rs/crate-redeem-in-kind) |
+| `crate-token`              | Fractional ownership of a basket of assets.       | [![Crates.io](https://img.shields.io/crates/v/crate-token)](https://crates.io/crates/crate-token)                           | [![Docs.rs](https://docs.rs/crate-token/badge.svg)](https://docs.rs/crate-token)                   |
+| `@crateprotocol/crate-sdk` | TypeScript SDK for Crate                          | [![npm](https://img.shields.io/npm/v/@crateprotocol/crate-sdk.svg)](https://www.npmjs.com/package/@crateprotocol/crate-sdk) | [![Docs](https://img.shields.io/badge/docs-typedoc-blue)](https://docs.crate.so/ts/)               |
 
 ## Addresses
 
 Program addresses are the same on devnet, testnet, and mainnet-beta.
 
-- Crate: [`CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs`](https://explorer.solana.com/address/CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs)
+- CrateRedeemInKind: [`1NKyU3qShZC3oJgvCCftAHDi5TFxcJwfyUz2FeZsiwE`](https://explorer.solana.com/address/1NKyU3qShZC3oJgvCCftAHDi5TFxcJwfyUz2FeZsiwE)
+- CrateToken: [`CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs`](https://explorer.solana.com/address/CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs)
 
 ## Contribution
 

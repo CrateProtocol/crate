@@ -3,7 +3,7 @@
 use anchor_lang::prelude::*;
 use vipers::{assert_keys, invariant};
 
-use crate::{Issue, NewCrate, Redeem};
+use crate::{Issue, NewCrate, SetFees, Withdraw};
 use anchor_lang::Key;
 use vipers::validate::Validate;
 
@@ -11,12 +11,12 @@ impl<'info> Validate<'info> for NewCrate<'info> {
     fn validate(&self) -> ProgramResult {
         assert_keys!(
             self.crate_mint.mint_authority.unwrap(),
-            self.crate_info.key(),
+            self.crate_token,
             "crate_mint.mint_authority"
         );
         assert_keys!(
             self.crate_mint.freeze_authority.unwrap(),
-            self.crate_info.key(),
+            self.crate_token,
             "crate_mint.mint_authority"
         );
         invariant!(self.crate_mint.supply == 0, "supply must be zero");
@@ -24,36 +24,113 @@ impl<'info> Validate<'info> for NewCrate<'info> {
     }
 }
 
-impl<'info> Validate<'info> for Issue<'info> {
+impl<'info> Validate<'info> for SetFees<'info> {
     fn validate(&self) -> ProgramResult {
         assert_keys!(
-            self.crate_info.mint,
-            self.crate_mint.key(),
-            "crate_info.mint"
-        );
-        assert_keys!(
-            self.crate_info.issue_authority,
-            self.issue_authority,
-            "crate_info.issue_authority"
-        );
-        assert_keys!(
-            self.mint_destination.mint,
-            self.crate_info.mint,
-            "mint_destination.mint"
+            self.crate_token.fee_setter_authority,
+            self.fee_setter,
+            "crate_token.fee_setter_authority"
         );
         Ok(())
     }
 }
 
-impl<'info> Validate<'info> for Redeem<'info> {
+impl<'info> Validate<'info> for Issue<'info> {
     fn validate(&self) -> ProgramResult {
         assert_keys!(
-            self.crate_info.mint,
+            self.crate_token.mint,
             self.crate_mint.key(),
             "crate_info.mint"
         );
-        assert_keys!(self.crate_source.mint, self.crate_mint, "crate_source.mint");
-        assert_keys!(self.crate_source.owner, self.owner, "crate_source.owner");
+        assert_keys!(
+            self.crate_token.issue_authority,
+            self.issue_authority,
+            "crate_info.issue_authority"
+        );
+
+        assert_keys!(
+            self.mint_destination.mint,
+            self.crate_token.mint,
+            "mint_destination.mint"
+        );
+
+        // only validate fee destinations if there are fees
+        if self.crate_token.issue_fee_bps != 0 {
+            assert_keys!(
+                self.author_fee_destination.mint,
+                self.crate_token.mint,
+                "author_fee_destination.mint"
+            );
+            assert_keys!(
+                self.author_fee_destination.owner,
+                self.crate_token.author_fee_to,
+                "author_fee_destination.owner"
+            );
+            assert_keys!(
+                self.protocol_fee_destination.mint,
+                self.crate_token.mint,
+                "protocol_fee_destination.mint"
+            );
+            assert_keys!(
+                self.protocol_fee_destination.owner,
+                crate::FEE_TO_ADDRESS,
+                "fee to mismatch"
+            );
+        }
+
+        Ok(())
+    }
+}
+
+impl<'info> Validate<'info> for Withdraw<'info> {
+    fn validate(&self) -> ProgramResult {
+        assert_keys!(
+            self.crate_token.withdraw_authority,
+            self.withdraw_authority,
+            "crate_info.withdraw_authority"
+        );
+        assert_keys!(
+            self.crate_underlying.owner,
+            self.crate_token,
+            "self.crate_underlying.owner"
+        );
+
+        assert_keys!(
+            self.crate_token.withdraw_authority,
+            self.withdraw_authority,
+            "crate_token.withdraw_authority"
+        );
+
+        assert_keys!(
+            self.withdraw_destination.mint,
+            self.crate_underlying.mint,
+            "withdraw_destination.mint"
+        );
+
+        // only validate fee destinations if there are fees
+        if self.crate_token.withdraw_fee_bps != 0 {
+            assert_keys!(
+                self.author_fee_destination.mint,
+                self.crate_underlying.mint,
+                "author_fee_destination.mint"
+            );
+            assert_keys!(
+                self.author_fee_destination.owner,
+                self.crate_token.author_fee_to,
+                "author_fee_destination.owner"
+            );
+            assert_keys!(
+                self.protocol_fee_destination.mint,
+                self.crate_underlying.mint,
+                "protocol_fee_destination.mint"
+            );
+            assert_keys!(
+                self.protocol_fee_destination.owner,
+                crate::FEE_TO_ADDRESS,
+                "fee to mismatch"
+            );
+        }
+
         Ok(())
     }
 }

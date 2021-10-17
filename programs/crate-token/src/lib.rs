@@ -3,18 +3,17 @@
 #![allow(rustdoc::missing_doc_code_examples)]
 
 mod account_validators;
+mod macros;
 
 pub mod events;
 pub mod state;
 
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount};
-use num_traits::cast::ToPrimitive;
 use vipers::validate::Validate;
-use vipers::{assert_keys, invariant, unwrap_int};
 
 use events::*;
-use state::*;
+pub use state::*;
 
 declare_id!("CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs");
 
@@ -27,8 +26,14 @@ pub mod fee_to_address {
 /// Address where fees are sent to.
 pub static FEE_TO_ADDRESS: Pubkey = fee_to_address::ID;
 
-/// Denominator for computing the withdraw fee. Currently 1bp.
-pub static WITHDRAW_FEE_DENOM: u64 = 10_000;
+/// Issuance fee as a portion of the crate's fee, in bps.
+pub static ISSUE_FEE_BPS: u16 = 2_000;
+
+/// Withdraw fee as a portion of the crate's fee, in bps.
+pub static WITHDRAW_FEE_BPS: u16 = 2_000;
+
+/// Maximum fee for anything.
+pub const MAX_FEE_BPS: u16 = 10_000;
 
 /// [crate_token] program.
 #[program]
@@ -38,158 +43,184 @@ pub mod crate_token {
     /// Provisions a new Crate.
     #[access_control(ctx.accounts.validate())]
     pub fn new_crate(ctx: Context<NewCrate>, bump: u8) -> ProgramResult {
-        let info = &mut ctx.accounts.crate_info;
+        let info = &mut ctx.accounts.crate_token;
         info.mint = ctx.accounts.crate_mint.key();
         info.bump = bump;
+
+        info.fee_setter_authority = ctx.accounts.fee_setter_authority.key();
         info.issue_authority = ctx.accounts.issue_authority.key();
+        info.withdraw_authority = ctx.accounts.withdraw_authority.key();
+        info.author_fee_to = ctx.accounts.author_fee_to.key();
+
+        info.issue_fee_bps = 0;
+        info.withdraw_fee_bps = 0;
 
         emit!(NewCrateEvent {
             issue_authority: ctx.accounts.issue_authority.key(),
-            crate_key: ctx.accounts.crate_info.key(),
+            withdraw_authority: ctx.accounts.withdraw_authority.key(),
+            crate_key: ctx.accounts.crate_token.key(),
         });
 
+        Ok(())
+    }
+
+    /// Set the issue fee.
+    #[access_control(ctx.accounts.validate())]
+    pub fn set_issue_fee(ctx: Context<SetFees>, issue_fee_bps: u16) -> ProgramResult {
+        require!(issue_fee_bps <= MAX_FEE_BPS, MaxFeeExceeded);
+        let crate_token = &mut ctx.accounts.crate_token;
+        crate_token.issue_fee_bps = issue_fee_bps;
+        Ok(())
+    }
+
+    /// Set the withdraw fee.
+    #[access_control(ctx.accounts.validate())]
+    pub fn set_withdraw_fee(ctx: Context<SetFees>, withdraw_fee_bps: u16) -> ProgramResult {
+        require!(withdraw_fee_bps <= MAX_FEE_BPS, MaxFeeExceeded);
+        let crate_token = &mut ctx.accounts.crate_token;
+        crate_token.withdraw_fee_bps = withdraw_fee_bps;
         Ok(())
     }
 
     /// Issues Crate tokens.
     #[access_control(ctx.accounts.validate())]
     pub fn issue(ctx: Context<Issue>, amount: u64) -> ProgramResult {
-        let seeds: &[&[u8]] = &[
-            b"CrateInfo".as_ref(),
-            &ctx.accounts.crate_info.mint.to_bytes(),
-            &[ctx.accounts.crate_info.bump],
-        ];
+        // Do nothing if there is a zero amount.
+        if amount == 0 {
+            return Ok(());
+        }
+
+        let seeds: &[&[u8]] = gen_crate_signer_seeds!(ctx.accounts.crate_token);
+        let crate_token = &ctx.accounts.crate_token;
+        let state::Fees {
+            amount,
+            author_fee,
+            protocol_fee,
+        } = crate_token.apply_issue_fee(amount)?;
+
         token::mint_to(
             CpiContext::new_with_signer(
                 ctx.accounts.token_program.to_account_info(),
                 token::MintTo {
                     mint: ctx.accounts.crate_mint.to_account_info(),
                     to: ctx.accounts.mint_destination.to_account_info(),
-                    authority: ctx.accounts.crate_info.to_account_info(),
+                    authority: ctx.accounts.crate_token.to_account_info(),
                 },
                 &[seeds],
             ),
             amount,
         )?;
 
+        if author_fee > 0 {
+            token::mint_to(
+                CpiContext::new_with_signer(
+                    ctx.accounts.token_program.to_account_info(),
+                    token::MintTo {
+                        mint: ctx.accounts.crate_mint.to_account_info(),
+                        to: ctx.accounts.author_fee_destination.to_account_info(),
+                        authority: ctx.accounts.crate_token.to_account_info(),
+                    },
+                    &[seeds],
+                ),
+                author_fee,
+            )?;
+        }
+
+        if protocol_fee > 0 {
+            token::mint_to(
+                CpiContext::new_with_signer(
+                    ctx.accounts.token_program.to_account_info(),
+                    token::MintTo {
+                        mint: ctx.accounts.crate_mint.to_account_info(),
+                        to: ctx.accounts.protocol_fee_destination.to_account_info(),
+                        authority: ctx.accounts.crate_token.to_account_info(),
+                    },
+                    &[seeds],
+                ),
+                protocol_fee,
+            )?;
+        }
+
         emit!(IssueEvent {
-            crate_key: ctx.accounts.crate_info.key(),
+            crate_key: ctx.accounts.crate_token.key(),
             destination: ctx.accounts.mint_destination.key(),
             amount,
+            author_fee,
+            protocol_fee
         });
 
         Ok(())
     }
 
-    /// Redeems Crate tokens for their underlying assets.
+    /// Withdraws Crate tokens.
     #[access_control(ctx.accounts.validate())]
-    pub fn redeem<'info>(
-        ctx: Context<'_, '_, '_, 'info, Redeem<'info>>,
-        amount: u64,
-    ) -> ProgramResult {
-        let burn = token::Burn {
-            mint: ctx.accounts.crate_mint.to_account_info(),
-            to: ctx.accounts.crate_source.to_account_info(),
-            authority: ctx.accounts.owner.to_account_info(),
-        };
+    pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> ProgramResult {
+        // Do nothing if there is a zero amount.
+        if amount == 0 {
+            return Ok(());
+        }
 
         let token_program = ctx.accounts.token_program.to_account_info();
-        token::burn(
-            CpiContext::new(ctx.accounts.token_program.to_account_info(), burn),
+        let seeds = gen_crate_signer_seeds!(ctx.accounts.crate_token);
+        let signer_seeds: &[&[&[u8]]] = &[seeds];
+        let crate_token = &ctx.accounts.crate_token;
+        let state::Fees {
+            amount,
+            author_fee,
+            protocol_fee,
+        } = crate_token.apply_withdraw_fee(amount)?;
+
+        // share
+        token::transfer(
+            CpiContext::new_with_signer(
+                token_program.clone(),
+                token::Transfer {
+                    from: ctx.accounts.crate_underlying.to_account_info(),
+                    to: ctx.accounts.withdraw_destination.to_account_info(),
+                    authority: ctx.accounts.crate_token.to_account_info(),
+                },
+                signer_seeds,
+            ),
             amount,
         )?;
 
-        let seeds: &[&[u8]] = &[
-            b"CrateInfo".as_ref(),
-            &ctx.accounts.crate_info.mint.to_bytes(),
-            &[ctx.accounts.crate_info.bump],
-        ];
-        let signer_seeds: &[&[&[u8]]] = &[seeds];
-
-        // calculate the fractional slice of each account
-        let num_remaining_accounts = ctx.remaining_accounts.len();
-        if num_remaining_accounts == 0 {
-            return Ok(());
-        }
-        invariant!(
-            num_remaining_accounts % 3 == 0,
-            "must have even number of tokens"
-        );
-        let num_tokens = unwrap_int!(num_remaining_accounts.checked_div(3));
-        // TODO: add check to make sure every single token in the crate was redeemed
-
-        let remaining_accounts_iter = &mut ctx.remaining_accounts.iter();
-
-        for _i in 0..num_tokens {
-            let pair = RedeemPair {
-                crate_underlying_token_account: Account::try_from(next_account_info(
-                    remaining_accounts_iter,
-                )?)?,
-                dest_token_account: Account::try_from(next_account_info(remaining_accounts_iter)?)?,
-                fee_token_account: Account::try_from(next_account_info(remaining_accounts_iter)?)?,
-            };
-
-            assert_keys!(
-                pair.crate_underlying_token_account.owner,
-                ctx.accounts.crate_info,
-                "pair.crate_underlying_token_account.owner"
-            );
-            assert_keys!(
-                pair.crate_underlying_token_account.mint,
-                pair.dest_token_account.mint,
-                "pair mint"
-            );
-            assert_keys!(
-                pair.crate_underlying_token_account.mint,
-                pair.fee_token_account.mint,
-                "fee mint"
-            );
-            assert_keys!(
-                pair.fee_token_account.owner,
-                FEE_TO_ADDRESS,
-                "fee to mismatch"
-            );
-
-            let share_opt = (pair.crate_underlying_token_account.amount as u128)
-                .checked_mul(amount.into())
-                .and_then(|num| num.checked_div(ctx.accounts.crate_mint.supply.into()))
-                .and_then(|num| num.to_u64());
-            let share: u64 = unwrap_int!(share_opt);
-            let fee = unwrap_int!(share.checked_div_euclid(WITHDRAW_FEE_DENOM));
-
-            // share
+        if author_fee > 0 {
             token::transfer(
                 CpiContext::new_with_signer(
                     token_program.clone(),
                     token::Transfer {
-                        from: pair.crate_underlying_token_account.to_account_info(),
-                        to: pair.dest_token_account.to_account_info(),
-                        authority: ctx.accounts.crate_info.to_account_info(),
+                        from: ctx.accounts.crate_underlying.to_account_info(),
+                        to: ctx.accounts.author_fee_destination.to_account_info(),
+                        authority: ctx.accounts.crate_token.to_account_info(),
                     },
                     signer_seeds,
                 ),
-                unwrap_int!(share.checked_sub(fee)),
+                author_fee,
             )?;
+        }
 
-            // fees
+        if protocol_fee > 0 {
             token::transfer(
                 CpiContext::new_with_signer(
                     token_program.clone(),
                     token::Transfer {
-                        from: pair.crate_underlying_token_account.to_account_info(),
-                        to: pair.fee_token_account.to_account_info(),
-                        authority: ctx.accounts.crate_info.to_account_info(),
+                        from: ctx.accounts.crate_underlying.to_account_info(),
+                        to: ctx.accounts.protocol_fee_destination.to_account_info(),
+                        authority: ctx.accounts.crate_token.to_account_info(),
                     },
                     signer_seeds,
                 ),
-                fee,
+                protocol_fee,
             )?;
         }
 
-        emit!(RedeemEvent {
-            crate_key: ctx.accounts.crate_info.key(),
-            source: ctx.accounts.crate_source.key(),
-            amount
+        emit!(WithdrawEvent {
+            crate_key: ctx.accounts.crate_token.key(),
+            token: ctx.accounts.crate_underlying.mint,
+            destination: ctx.accounts.withdraw_destination.key(),
+            amount,
+            author_fee,
+            protocol_fee,
         });
 
         Ok(())
@@ -208,19 +239,28 @@ pub struct NewCrate<'info> {
     #[account(
         init,
         seeds = [
-            b"CrateInfo".as_ref(),
+            b"CrateToken".as_ref(),
             crate_mint.key().to_bytes().as_ref()
         ],
         bump = bump,
         payer = payer
     )]
-    pub crate_info: Account<'info, CrateInfo>,
+    pub crate_token: Account<'info, CrateToken>,
 
-    /// [Mint] of the [CrateInfo].
+    /// [Mint] of the [CrateToken].
     pub crate_mint: Account<'info, Mint>,
 
-    /// The authority that can issue new [CrateInfo] tokens.
+    /// The authority that can set fees.
+    pub fee_setter_authority: UncheckedAccount<'info>,
+
+    /// The authority that can issue new [CrateToken] tokens.
     pub issue_authority: UncheckedAccount<'info>,
+
+    /// The authority that can redeem the [CrateToken] token underlying.
+    pub withdraw_authority: UncheckedAccount<'info>,
+
+    /// Owner of the author fee accounts.
+    pub author_fee_to: UncheckedAccount<'info>,
 
     /// Payer of the crate initialization.
     #[account(mut)]
@@ -230,13 +270,25 @@ pub struct NewCrate<'info> {
     pub system_program: Program<'info, System>,
 }
 
+/// Accounts for [crate_token::set_issue_fee] and [crate_token::set_withdraw_fee].
+#[derive(Accounts)]
+#[instruction(bump: u8)]
+pub struct SetFees<'info> {
+    /// Information about the crate.
+    #[account(mut)]
+    pub crate_token: Account<'info, CrateToken>,
+
+    /// Account that can set the fees.
+    pub fee_setter: Signer<'info>,
+}
+
 /// Accounts for [crate_token::issue].
 #[derive(Accounts)]
 pub struct Issue<'info> {
     /// Information about the crate.
-    pub crate_info: Account<'info, CrateInfo>,
+    pub crate_token: Account<'info, CrateToken>,
 
-    /// [Mint] of the [CrateInfo].
+    /// [Mint] of the [CrateToken].
     #[account(mut)]
     pub crate_mint: Account<'info, Mint>,
 
@@ -247,40 +299,52 @@ pub struct Issue<'info> {
     #[account(mut)]
     pub mint_destination: Account<'info, TokenAccount>,
 
+    /// Destination of the author fee tokens.
+    #[account(mut)]
+    pub author_fee_destination: Account<'info, TokenAccount>,
+
+    /// Destination of the protocol fee tokens.
+    #[account(mut)]
+    pub protocol_fee_destination: Account<'info, TokenAccount>,
+
     /// [Token] program.
     pub token_program: Program<'info, Token>,
 }
 
-/// Accounts for [crate_token::redeem].
+/// Accounts for [crate_token::withdraw].
 #[derive(Accounts)]
-pub struct Redeem<'info> {
+pub struct Withdraw<'info> {
     /// Information about the crate.
-    pub crate_info: Account<'info, CrateInfo>,
+    pub crate_token: Account<'info, CrateToken>,
 
-    /// [Mint] of the [CrateInfo].
+    /// Crate-owned account of the tokens
     #[account(mut)]
-    pub crate_mint: Account<'info, Mint>,
+    pub crate_underlying: Account<'info, TokenAccount>,
 
-    /// Source of the crate tokens.
+    /// Authority that can withdraw.
+    pub withdraw_authority: Signer<'info>,
+
+    /// Destination of the withdrawn tokens.
     #[account(mut)]
-    pub crate_source: Account<'info, TokenAccount>,
+    pub withdraw_destination: Account<'info, TokenAccount>,
 
-    /// Owner of the crate source.
-    pub owner: Signer<'info>,
+    /// Destination of the author fee tokens.
+    #[account(mut)]
+    pub author_fee_destination: Account<'info, TokenAccount>,
+
+    /// Destination of the protocol fee tokens.
+    #[account(mut)]
+    pub protocol_fee_destination: Account<'info, TokenAccount>,
 
     /// [Token] program.
     pub token_program: Program<'info, Token>,
 }
 
-/// Accounts for [crate_token::new_crate].
-#[derive(Accounts)]
-pub struct RedeemPair<'info> {
-    /// Crate account of the tokens
-    pub crate_underlying_token_account: Account<'info, TokenAccount>,
-    /// Destination of the tokens to redeem
-    pub dest_token_account: Account<'info, TokenAccount>,
-    /// Fee token destination
-    pub fee_token_account: Account<'info, TokenAccount>,
+#[error]
+/// Error codes.
+pub enum ErrorCode {
+    #[msg("Maximum fee exceeded.")]
+    MaxFeeExceeded,
 }
 
 #[cfg(test)]

@@ -1,0 +1,27 @@
+[package]
+name = "crate-redeem-in-kind"
+version = "0.1.1"
+description = "In-kind distributions for redeeming Crate assets."
+edition = "2018"
+homepage = "https://crate.so"
+repository = "https://github.com/CrateProtocol/crate"
+authors = ["Jen Zhang <jen@crate.so>"]
+license = "AGPL-3.0"
+keywords = ["solana", "crate"]
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "crate_redeem_in_kind"
+
+[features]
+no-entrypoint = []
+no-idl = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.17.0"
+anchor-spl = "0.17.0"
+crate-token = { path = "../crate-token", version = "0.1.1", features = ["cpi"] }
+vipers = "1.2.1"
+num-traits = "0.2"
