@@ -68,5 +68,9 @@
   "lint-staged": {
     "*.ts": "eslint --cache --fix",
     "*.{md,json,js,yml,yaml}": "prettier --write"
-  }
+  },
+  "files": [
+    "dist/",
+    "src/"
+  ]
 }
