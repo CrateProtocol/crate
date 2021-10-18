@@ -47,6 +47,7 @@ pub mod crate_token {
         info.mint = ctx.accounts.crate_mint.key();
         info.bump = bump;
 
+        info.fee_to_setter = ctx.accounts.fee_to_setter.key();
         info.fee_setter_authority = ctx.accounts.fee_setter_authority.key();
         info.issue_authority = ctx.accounts.issue_authority.key();
         info.withdraw_authority = ctx.accounts.withdraw_authority.key();
@@ -65,6 +66,7 @@ pub mod crate_token {
     }
 
     /// Set the issue fee.
+    /// Only the `fee_setter_authority` can call this.
     #[access_control(ctx.accounts.validate())]
     pub fn set_issue_fee(ctx: Context<SetFees>, issue_fee_bps: u16) -> ProgramResult {
         require!(issue_fee_bps <= MAX_FEE_BPS, MaxFeeExceeded);
@@ -74,6 +76,7 @@ pub mod crate_token {
     }
 
     /// Set the withdraw fee.
+    /// Only the `fee_setter_authority` can call this.
     #[access_control(ctx.accounts.validate())]
     pub fn set_withdraw_fee(ctx: Context<SetFees>, withdraw_fee_bps: u16) -> ProgramResult {
         require!(withdraw_fee_bps <= MAX_FEE_BPS, MaxFeeExceeded);
@@ -82,7 +85,26 @@ pub mod crate_token {
         Ok(())
     }
 
+    /// Set the next recipient of the fees.
+    /// Only the `fee_to_setter` can call this.
+    #[access_control(ctx.accounts.validate())]
+    pub fn set_fee_to(ctx: Context<SetFeeTo>) -> ProgramResult {
+        let crate_token = &mut ctx.accounts.crate_token;
+        crate_token.author_fee_to = ctx.accounts.author_fee_to.key();
+        Ok(())
+    }
+
+    /// Sets who can change who sets the fees.
+    /// Only the `fee_to_setter` can call this.
+    #[access_control(ctx.accounts.validate())]
+    pub fn set_fee_to_setter(ctx: Context<SetFeeToSetter>) -> ProgramResult {
+        let crate_token = &mut ctx.accounts.crate_token;
+        crate_token.fee_to_setter = ctx.accounts.next_fee_to_setter.key();
+        Ok(())
+    }
+
     /// Issues Crate tokens.
+    /// Only the `issue_authority` can call this.
     #[access_control(ctx.accounts.validate())]
     pub fn issue(ctx: Context<Issue>, amount: u64) -> ProgramResult {
         // Do nothing if there is a zero amount.
@@ -153,6 +175,7 @@ pub mod crate_token {
     }
 
     /// Withdraws Crate tokens.
+    /// Only the `withdraw_authority` can call this.
     #[access_control(ctx.accounts.validate())]
     pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> ProgramResult {
         // Do nothing if there is a zero amount.
@@ -250,6 +273,9 @@ pub struct NewCrate<'info> {
     /// [Mint] of the [CrateToken].
     pub crate_mint: Account<'info, Mint>,
 
+    /// The authority that can change who fees go to.
+    pub fee_to_setter: UncheckedAccount<'info>,
+
     /// The authority that can set fees.
     pub fee_setter_authority: UncheckedAccount<'info>,
 
@@ -280,6 +306,32 @@ pub struct SetFees<'info> {
 
     /// Account that can set the fees.
     pub fee_setter: Signer<'info>,
+}
+
+/// Accounts for [crate_token::set_fee_to].
+#[derive(Accounts)]
+#[instruction(bump: u8)]
+pub struct SetFeeTo<'info> {
+    /// Information about the crate.
+    #[account(mut)]
+    pub crate_token: Account<'info, CrateToken>,
+    /// Account that can set the fee recipient.
+    pub fee_to_setter: Signer<'info>,
+    /// Who the fees go to.
+    pub author_fee_to: UncheckedAccount<'info>,
+}
+
+/// Accounts for [crate_token::set_fee_to_setter].
+#[derive(Accounts)]
+#[instruction(bump: u8)]
+pub struct SetFeeToSetter<'info> {
+    /// Information about the crate.
+    #[account(mut)]
+    pub crate_token: Account<'info, CrateToken>,
+    /// Account that can set the fee recipient.
+    pub fee_to_setter: Signer<'info>,
+    /// Who will be able to change the fees next.
+    pub next_fee_to_setter: UncheckedAccount<'info>,
 }
 
 /// Accounts for [crate_token::issue].

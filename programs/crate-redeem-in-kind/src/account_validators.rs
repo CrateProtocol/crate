@@ -14,7 +14,7 @@ impl<'info> Validate<'info> for Redeem<'info> {
             "withdraw_authority"
         );
 
-        assert_keys!(self.crate_token.mint, self.crate_mint, "crate_info.mint");
+        assert_keys!(self.crate_token.mint, self.crate_mint, "crate_token.mint");
         assert_keys!(self.crate_source.mint, self.crate_mint, "crate_source.mint");
         assert_keys!(self.crate_source.owner, self.owner, "crate_source.owner");
         Ok(())

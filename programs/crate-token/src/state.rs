@@ -14,6 +14,8 @@ pub struct CrateToken {
 
     /// Authority that can modify the [CrateToken]'s fees.
     pub fee_setter_authority: Pubkey,
+    /// Authority that can modify who can change the fees.
+    pub fee_to_setter: Pubkey,
     /// Authority that is allowed to issue new shares of the Crate.
     /// This is usually a program that will handle users depositing
     /// tokens into the crate + giving them shares of the crate.

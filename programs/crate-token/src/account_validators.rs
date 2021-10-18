@@ -3,7 +3,7 @@
 use anchor_lang::prelude::*;
 use vipers::{assert_keys, invariant};
 
-use crate::{Issue, NewCrate, SetFees, Withdraw};
+use crate::{Issue, NewCrate, SetFeeTo, SetFeeToSetter, SetFees, Withdraw};
 use anchor_lang::Key;
 use vipers::validate::Validate;
 
@@ -35,17 +35,39 @@ impl<'info> Validate<'info> for SetFees<'info> {
     }
 }
 
+impl<'info> Validate<'info> for SetFeeTo<'info> {
+    fn validate(&self) -> ProgramResult {
+        assert_keys!(
+            self.crate_token.fee_to_setter,
+            self.fee_to_setter,
+            "crate_token.fee_to_setter"
+        );
+        Ok(())
+    }
+}
+
+impl<'info> Validate<'info> for SetFeeToSetter<'info> {
+    fn validate(&self) -> ProgramResult {
+        assert_keys!(
+            self.crate_token.fee_to_setter,
+            self.fee_to_setter,
+            "crate_token.fee_to_setter"
+        );
+        Ok(())
+    }
+}
+
 impl<'info> Validate<'info> for Issue<'info> {
     fn validate(&self) -> ProgramResult {
         assert_keys!(
             self.crate_token.mint,
             self.crate_mint.key(),
-            "crate_info.mint"
+            "crate_token.mint"
         );
         assert_keys!(
             self.crate_token.issue_authority,
             self.issue_authority,
-            "crate_info.issue_authority"
+            "crate_token.issue_authority"
         );
 
         assert_keys!(
@@ -85,20 +107,14 @@ impl<'info> Validate<'info> for Issue<'info> {
 impl<'info> Validate<'info> for Withdraw<'info> {
     fn validate(&self) -> ProgramResult {
         assert_keys!(
-            self.crate_token.withdraw_authority,
-            self.withdraw_authority,
-            "crate_info.withdraw_authority"
-        );
-        assert_keys!(
             self.crate_underlying.owner,
             self.crate_token,
-            "self.crate_underlying.owner"
+            "crate_underlying.owner"
         );
-
         assert_keys!(
-            self.crate_token.withdraw_authority,
             self.withdraw_authority,
-            "crate_token.withdraw_authority"
+            self.crate_token.withdraw_authority,
+            "withdraw_authority"
         );
 
         assert_keys!(

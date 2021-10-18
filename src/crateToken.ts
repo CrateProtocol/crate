@@ -91,6 +91,7 @@ export class CrateSDK {
     decimals = 6,
     payer = this.provider.wallet.publicKey,
 
+    feeToSetter = this.provider.wallet.publicKey,
     feeSetterAuthority = this.provider.wallet.publicKey,
     issueAuthority = this.provider.wallet.publicKey,
     withdrawAuthority = CRATE_REDEEM_IN_KIND_WITHDRAW_AUTHORITY,
@@ -100,6 +101,7 @@ export class CrateSDK {
     decimals?: number;
     payer?: PublicKey;
 
+    feeToSetter?: PublicKey;
     feeSetterAuthority?: PublicKey;
     issueAuthority?: PublicKey;
     withdrawAuthority?: PublicKey;
@@ -122,6 +124,7 @@ export class CrateSDK {
         accounts: {
           crateToken: crateKey,
           crateMint: mintKP.publicKey,
+          feeToSetter,
           feeSetterAuthority,
           issueAuthority,
           withdrawAuthority,
