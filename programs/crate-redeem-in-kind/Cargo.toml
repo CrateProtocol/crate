@@ -1,6 +1,6 @@
 [package]
 name = "crate-redeem-in-kind"
-version = "0.2.0"
+version = "0.3.0"
 description = "In-kind distributions for redeeming Crate assets."
 edition = "2018"
 homepage = "https://crate.so"
@@ -22,6 +22,6 @@ default = []
 [dependencies]
 anchor-lang = "0.17.0"
 anchor-spl = "0.17.0"
-crate-token = { path = "../crate-token", version = "0.2.0", features = ["cpi"] }
+crate-token = { path = "../crate-token", version = "0.3.0", features = ["cpi"] }
 vipers = "1.2.1"
 num-traits = "0.2"
