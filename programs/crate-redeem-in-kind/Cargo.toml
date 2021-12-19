@@ -2,7 +2,7 @@
 name = "crate-redeem-in-kind"
 version = "0.3.1"
 description = "In-kind distributions for redeeming Crate assets."
-edition = "2018"
+edition = "2021"
 homepage = "https://crate.so"
 repository = "https://github.com/CrateProtocol/crate"
 authors = ["Jen Zhang <jen@crate.so>"]
@@ -23,5 +23,6 @@ default = []
 anchor-lang = ">=0.17.0"
 anchor-spl = ">=0.17.0"
 crate-token = { path = "../crate-token", version = "0.3.0", features = ["cpi"] }
-vipers = "1.2.1"
+static-pubkey = "^1.0.2"
+vipers = "1.5.5"
 num-traits = "0.2"

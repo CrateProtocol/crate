@@ -9,7 +9,9 @@ pub mod events;
 pub mod state;
 
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program;
 use anchor_spl::token::{self, Mint, Token, TokenAccount};
+use static_pubkey::static_pubkey;
 use vipers::validate::Validate;
 
 use events::*;
@@ -18,13 +20,7 @@ pub use state::*;
 declare_id!("CRATwLpu6YZEeiVq9ajjxs61wPQ9f29s1UoQR9siJCRs");
 
 /// Address where fees are sent to.
-mod fee_to_address {
-    use anchor_lang::declare_id;
-    declare_id!("AAqAKWdsUPepSgXf7Msbp1pQ7yCPgYkBvXmNfTFBGAqp");
-}
-
-/// Address where fees are sent to.
-pub static FEE_TO_ADDRESS: Pubkey = fee_to_address::ID;
+pub static FEE_TO_ADDRESS: Pubkey = static_pubkey!("AAqAKWdsUPepSgXf7Msbp1pQ7yCPgYkBvXmNfTFBGAqp");
 
 /// Issuance fee as a portion of the crate's fee, in bps.
 pub static ISSUE_FEE_BPS: u16 = 2_000;

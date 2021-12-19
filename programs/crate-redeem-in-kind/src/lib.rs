@@ -7,9 +7,11 @@ mod account_validators;
 pub mod events;
 
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program;
 use anchor_lang::solana_program::account_info::next_account_infos;
 use anchor_spl::token::{self, Mint, Token, TokenAccount};
 use num_traits::cast::ToPrimitive;
+use static_pubkey::static_pubkey;
 use vipers::validate::Validate;
 use vipers::{invariant, unwrap_int};
 
@@ -17,15 +19,9 @@ use events::*;
 
 declare_id!("1NKyU3qShZC3oJgvCCftAHDi5TFxcJwfyUz2FeZsiwE");
 
-/// Withdraw authority address.
-mod withdraw_authority {
-    use anchor_lang::declare_id;
-
-    declare_id!("2amCDqmgpQ2qkryLArCcYeX8DzyNqvjuy7yKq6hsonqF");
-}
-
 /// Address of the withdraw authority to use for this Crate.
-pub static WITHDRAW_AUTHORITY_ADDRESS: Pubkey = withdraw_authority::ID;
+pub static WITHDRAW_AUTHORITY_ADDRESS: Pubkey =
+    static_pubkey!("2amCDqmgpQ2qkryLArCcYeX8DzyNqvjuy7yKq6hsonqF");
 
 /// Bump seed of the above address.
 pub const WITHDRAW_AUTHORITY_ADDRESS_BUMP: u8 = 255;

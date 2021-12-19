@@ -8,8 +8,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  SOLANA_VERSION: "1.7.11"
-  RUST_TOOLCHAIN: nightly-2021-09-01
+  SOLANA_VERSION: "1.9.1"
+  RUST_TOOLCHAIN: nightly-2021-12-18
   NPM_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
 
 jobs:
@@ -29,19 +29,18 @@ jobs:
         uses: cachix/cachix-action@v10
         with:
           name: crate
-          extraPullNames: quarry
+          extraPullNames: quarry, saber
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
       - name: Setup Node
         uses: actions/setup-node@v2
-        with:
-          always-auth: true
-          node-version: 14.x
       - name: Yarn Cache
         uses: actions/cache@v2
         with:
           path: ./.yarn
-          key: ${{ runner.os }}-${{ hashFiles('./.yarn/**/*.js') }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
       - name: Install Yarn dependencies
         run: yarn install
       - name: Parse IDLs
@@ -64,10 +63,22 @@ jobs:
           profile: minimal
           toolchain: ${{ env.RUST_TOOLCHAIN }}
       - uses: Swatinem/rust-cache@v1
-      - name: Install cargo-workspaces
-        run: cargo install cargo-workspaces || true
+
+      - uses: cachix/install-nix-action@v14
+        with:
+          install_url: https://nixos-nix-install-tests.cachix.org/serve/i6laym9jw3wg9mw6ncyrk6gjx4l34vvx/install
+          install_options: "--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve"
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v10
+        with:
+          name: crate
+          extraPullNames: quarry, saber
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
       - name: Publish crates
-        run: cargo ws publish --from-git --yes --skip-published --token ${{ secrets.CARGO_PUBLISH_TOKEN }}
+        run: nix shell .#ci --command cargo ws publish --from-git --yes --skip-published --token ${{ secrets.CARGO_PUBLISH_TOKEN }}
 
   release-binaries:
     runs-on: ubuntu-latest
@@ -84,11 +95,11 @@ jobs:
         uses: cachix/cachix-action@v10
         with:
           name: crate
-          extraPullNames: quarry
+          extraPullNames: quarry, saber
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
       - name: Build programs
-        run: nix shell .#ci --command anchor build -v
+        run: nix shell .#ci --command anchor build --verifiable --solana-version ${{ env.SOLANA_VERSION }}
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
@@ -96,3 +107,42 @@ jobs:
             target/deploy/*
             target/idl/*
             target/verifiable/*
+
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: cachix/install-nix-action@v14
+        with:
+          install_url: https://nixos-nix-install-tests.cachix.org/serve/i6laym9jw3wg9mw6ncyrk6gjx4l34vvx/install
+          install_options: "--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve"
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v10
+        with:
+          name: crate
+          extraPullNames: quarry, saber
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Yarn Cache
+        uses: actions/cache@v2
+        with:
+          path: ./.yarn
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
+      - name: Install Yarn dependencies
+        run: yarn install
+      - name: Parse IDLs
+        run: nix shell .#ci --command yarn idl:generate
+      - run: yarn docs:generate
+      - run: cp -R images/ site/
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@4.1.5
+        with:
+          branch: gh-pages
+          folder: site

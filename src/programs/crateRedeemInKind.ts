@@ -4,6 +4,6 @@ import type { CrateRedeemInKindIDL } from "../idls/crate_redeem_in_kind";
 
 export * from "../idls/crate_redeem_in_kind";
 
-type CrateRedeemInKindTypes = AnchorTypes<CrateRedeemInKindIDL>;
+export type CrateRedeemInKindTypes = AnchorTypes<CrateRedeemInKindIDL>;
 
 export type CrateRedeemInKindProgram = CrateRedeemInKindTypes["Program"];

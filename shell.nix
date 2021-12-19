@@ -26,7 +26,7 @@ pkgs.mkShell {
 
       libiconv
 
-      anchor
+      anchor-0_19_0
       spl-token-cli
     ] ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
       pkgs.darwin.apple_sdk.frameworks.AppKit
