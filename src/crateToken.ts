@@ -1,4 +1,4 @@
-import { Program, Provider as AnchorProvider } from "@project-serum/anchor";
+import { newProgramMap } from "@saberhq/anchor-contrib";
 import type { AugmentedProvider, Provider } from "@saberhq/solana-contrib";
 import {
   SolanaAugmentedProvider,
@@ -19,17 +19,15 @@ import type {
 import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
 import invariant from "tiny-invariant";
 
-import type { Addresses } from "./constants";
+import type { CrateAddresses, CratePrograms } from "./constants";
 import {
   CRATE_ADDRESSES,
   CRATE_FEE_OWNER,
+  CRATE_IDLS,
   CRATE_REDEEM_IN_KIND_WITHDRAW_AUTHORITY,
 } from "./constants";
-import { CrateRedeemInKindJSON } from "./idls/crate_redeem_in_kind";
-import { CrateTokenJSON } from "./idls/crate_token";
 import { generateCrateAddress } from "./pda";
-import type { CrateRedeemInKindProgram } from "./programs/crateRedeemInKind";
-import type { CrateTokenData, CrateTokenProgram } from "./programs/crateToken";
+import type { CrateTokenData } from "./programs/crateToken";
 
 /**
  * Javascript SDK for interacting with the Crate protocol.
@@ -37,10 +35,7 @@ import type { CrateTokenData, CrateTokenProgram } from "./programs/crateToken";
 export class CrateSDK {
   constructor(
     readonly provider: AugmentedProvider,
-    readonly programs: {
-      CrateToken: CrateTokenProgram;
-      CrateRedeemInKind: CrateRedeemInKindProgram;
-    }
+    readonly programs: CratePrograms
   ) {}
 
   /**
@@ -51,20 +46,12 @@ export class CrateSDK {
    */
   static init(
     provider: Provider,
-    addresses: Addresses = CRATE_ADDRESSES
+    addresses: CrateAddresses = CRATE_ADDRESSES
   ): CrateSDK {
-    return new CrateSDK(new SolanaAugmentedProvider(provider), {
-      CrateToken: new Program(
-        CrateTokenJSON,
-        addresses.CrateToken,
-        new AnchorProvider(provider.connection, provider.wallet, provider.opts)
-      ) as unknown as CrateTokenProgram,
-      CrateRedeemInKind: new Program(
-        CrateRedeemInKindJSON,
-        addresses.CrateRedeemInKind,
-        new AnchorProvider(provider.connection, provider.wallet, provider.opts)
-      ) as unknown as CrateRedeemInKindProgram,
-    });
+    return new CrateSDK(
+      new SolanaAugmentedProvider(provider),
+      newProgramMap<CratePrograms>(provider, CRATE_IDLS, addresses)
+    );
   }
 
   /**

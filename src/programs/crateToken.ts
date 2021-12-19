@@ -4,7 +4,7 @@ import type { CrateTokenIDL } from "../idls/crate_token";
 
 export * from "../idls/crate_token";
 
-type CrateTokenTypes = AnchorTypes<
+export type CrateTokenTypes = AnchorTypes<
   CrateTokenIDL,
   {
     crateToken: CrateTokenData;
