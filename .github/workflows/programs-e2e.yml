@@ -10,7 +10,6 @@ env:
   CARGO_TERM_COLOR: always
   SOLANA_VERSION: "1.9.1"
   RUST_TOOLCHAIN: nightly-2021-12-18
-  RUST_TOOLCHAIN: nightly-2021-09-01
 
 jobs:
   sdk:
