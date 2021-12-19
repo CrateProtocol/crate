@@ -36,6 +36,9 @@ export const CRATE_REDEEM_IN_KIND_WITHDRAW_AUTHORITY = new PublicKey(
   "2amCDqmgpQ2qkryLArCcYeX8DzyNqvjuy7yKq6hsonqF"
 );
 
+/**
+ * Coders for Crate accounts and programs.
+ */
 export const CRATE_CODERS = buildCoderMap<{
   CrateToken: CrateTokenTypes;
   CrateRedeemInKind: CrateRedeemInKindTypes;
