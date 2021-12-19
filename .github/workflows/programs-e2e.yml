@@ -8,7 +8,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  SOLANA_VERSION: "1.7.11"
+  SOLANA_VERSION: "1.9.1"
+  RUST_TOOLCHAIN: nightly-2021-12-18
   RUST_TOOLCHAIN: nightly-2021-09-01
 
 jobs:
@@ -81,8 +82,6 @@ jobs:
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           solana --version
-          echo "Generating keypair..."
-          solana-keygen new -o "$HOME/.config/solana/id.json" --no-passphrase --silent
 
       # Run build
       - uses: cachix/install-nix-action@v14
@@ -95,7 +94,7 @@ jobs:
         uses: cachix/cachix-action@v10
         with:
           name: crate
-          extraPullNames: quarry
+          extraPullNames: quarry, saber
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - name: Build program
         run: nix shell .#ci --command anchor build
@@ -107,8 +106,6 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('./.yarn/**/*.js') }}
       - name: Setup Node
         uses: actions/setup-node@v2
-        with:
-          node-version: "16"
       - run: yarn install
       - name: Generate IDL types
         run: nix shell .#ci --command yarn idl:generate:nolint
