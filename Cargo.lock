@@ -436,6 +436,7 @@ dependencies = [
  "anchor-spl",
  "crate-token",
  "num-traits",
+ "static-pubkey",
  "vipers",
 ]
 
