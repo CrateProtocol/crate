@@ -37,8 +37,8 @@ import type { CrateTokenData, CrateTokenProgram } from "./programs/crateToken";
  */
 export class CrateSDK {
   constructor(
-    public readonly provider: Provider,
-    public readonly programs: {
+    readonly provider: Provider,
+    readonly programs: {
       CrateToken: CrateTokenProgram;
       CrateRedeemInKind: CrateRedeemInKindProgram;
     }
@@ -71,7 +71,7 @@ export class CrateSDK {
   /**
    * Creates a new instance of the SDK with the given keypair.
    */
-  public withSigner(signer: Signer): CrateSDK {
+  withSigner(signer: Signer): CrateSDK {
     return CrateSDK.init(
       new SolanaProvider(
         this.provider.connection,
