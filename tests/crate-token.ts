@@ -131,14 +131,14 @@ describe("crate-token", () => {
     ).to.be.fulfilled;
 
     expect(
-      (await getTokenAccount(provider, otherAccount)).amount.toString()
-    ).to.equal("500000000");
+      (await getTokenAccount(provider, otherAccount)).amount
+    ).to.bignumber.equal("500000000");
     expect(
-      (await getTokenAccount(provider, userB.tokenAccount)).amount.toString()
-    ).to.equal("1000000000");
+      (await getTokenAccount(provider, userB.tokenAccount)).amount
+    ).to.bignumber.equal("1000000000");
     expect(
-      (await getMintInfo(provider, crateToken.mintAccount)).supply.toString()
-    ).to.equal("1500000000");
+      (await getMintInfo(provider, crateToken.mintAccount)).supply
+    ).to.bignumber.equal("1500000000");
 
     // fees
     const { instructions: feeIXs } = await getOrCreateATAs({
@@ -223,8 +223,8 @@ describe("crate-token", () => {
     ];
 
     expect(
-      (await getMintInfo(provider, crateToken.mintAccount)).supply.toString()
-    ).to.equal("1500000000");
+      (await getMintInfo(provider, crateToken.mintAccount)).supply
+    ).to.bignumber.equal("1500000000");
 
     await expectTX(
       await otherSDK.redeem({
@@ -238,27 +238,27 @@ describe("crate-token", () => {
       new u64(amt).sub(new u64(amt).div(new u64("10000"))).toString();
 
     expect(
-      (await getTokenAccount(provider, userAtokA)).amount.toString()
-    ).to.equal(withFees("3000000"));
+      (await getTokenAccount(provider, userAtokA)).amount
+    ).to.bignumber.equal(withFees("3000000"));
     expect(
-      (await getTokenAccount(provider, userAtokB)).amount.toString()
-    ).to.equal(withFees("6000000"));
+      (await getTokenAccount(provider, userAtokB)).amount
+    ).to.bignumber.equal(withFees("6000000"));
     expect(
-      (await getTokenAccount(provider, crateTokenA)).amount.toString()
-    ).to.equal("6000000");
+      (await getTokenAccount(provider, crateTokenA)).amount
+    ).to.bignumber.equal("6000000");
     expect(
-      (await getTokenAccount(provider, crateTokenB)).amount.toString()
-    ).to.equal("12000000");
+      (await getTokenAccount(provider, crateTokenB)).amount
+    ).to.bignumber.equal("12000000");
     expect(
-      (await getMintInfo(provider, crateToken.mintAccount)).supply.toString()
-    ).to.equal("1000000000");
+      (await getMintInfo(provider, crateToken.mintAccount)).supply
+    ).to.bignumber.equal("1000000000");
 
     expect(
-      (await getTokenAccount(provider, otherAccount)).amount.toString()
-    ).to.equal("0");
+      (await getTokenAccount(provider, otherAccount)).amount
+    ).to.bignumber.equal("0");
     expect(
-      (await getTokenAccount(provider, userB.tokenAccount)).amount.toString()
-    ).to.equal("1000000000");
+      (await getTokenAccount(provider, userB.tokenAccount)).amount
+    ).to.bignumber.equal("1000000000");
 
     await expectTX(
       await userB.sdk.redeem({
@@ -269,26 +269,26 @@ describe("crate-token", () => {
     ).to.be.fulfilled;
 
     expect(
-      (await getTokenAccount(provider, userBtokA)).amount.toString()
-    ).to.equal(withFees("6000000"));
+      (await getTokenAccount(provider, userBtokA)).amount
+    ).to.bignumber.equal(withFees("6000000"));
     expect(
-      (await getTokenAccount(provider, userBtokB)).amount.toString()
-    ).to.equal(withFees("12000000"));
+      (await getTokenAccount(provider, userBtokB)).amount
+    ).to.bignumber.equal(withFees("12000000"));
     expect(
-      (await getTokenAccount(provider, crateTokenA)).amount.toString()
-    ).to.equal("0");
+      (await getTokenAccount(provider, crateTokenA)).amount
+    ).to.bignumber.equal("0");
     expect(
-      (await getTokenAccount(provider, crateTokenB)).amount.toString()
-    ).to.equal("0");
+      (await getTokenAccount(provider, crateTokenB)).amount
+    ).to.bignumber.equal("0");
 
     expect(
-      (await getTokenAccount(provider, otherAccount)).amount.toString()
-    ).to.equal("0");
+      (await getTokenAccount(provider, otherAccount)).amount
+    ).to.bignumber.equal("0");
     expect(
-      (await getTokenAccount(provider, userB.tokenAccount)).amount.toString()
-    ).to.equal("0");
+      (await getTokenAccount(provider, userB.tokenAccount)).amount
+    ).to.bignumber.equal("0");
     expect(
-      (await getMintInfo(provider, crateToken.mintAccount)).supply.toString()
-    ).to.equal("0");
+      (await getMintInfo(provider, crateToken.mintAccount)).supply
+    ).to.bignumber.equal("0");
   });
 });
