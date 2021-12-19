@@ -1,8 +1,7 @@
 import { Program, Provider as AnchorProvider } from "@project-serum/anchor";
-import type { Provider } from "@saberhq/solana-contrib";
+import type { AugmentedProvider, Provider } from "@saberhq/solana-contrib";
 import {
-  SignerWallet,
-  SolanaProvider,
+  SolanaAugmentedProvider,
   TransactionEnvelope,
 } from "@saberhq/solana-contrib";
 import type { Token, TokenAmount } from "@saberhq/token-utils";
@@ -37,7 +36,7 @@ import type { CrateTokenData, CrateTokenProgram } from "./programs/crateToken";
  */
 export class CrateSDK {
   constructor(
-    readonly provider: Provider,
+    readonly provider: AugmentedProvider,
     readonly programs: {
       CrateToken: CrateTokenProgram;
       CrateRedeemInKind: CrateRedeemInKindProgram;
@@ -54,7 +53,7 @@ export class CrateSDK {
     provider: Provider,
     addresses: Addresses = CRATE_ADDRESSES
   ): CrateSDK {
-    return new CrateSDK(provider, {
+    return new CrateSDK(new SolanaAugmentedProvider(provider), {
       CrateToken: new Program(
         CrateTokenJSON,
         addresses.CrateToken,
@@ -72,14 +71,7 @@ export class CrateSDK {
    * Creates a new instance of the SDK with the given keypair.
    */
   withSigner(signer: Signer): CrateSDK {
-    return CrateSDK.init(
-      new SolanaProvider(
-        this.provider.connection,
-        this.provider.broadcaster,
-        new SignerWallet(signer),
-        this.provider.opts
-      )
-    );
+    return CrateSDK.init(this.provider.withSigner(signer));
   }
 
   /**
