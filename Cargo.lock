@@ -430,7 +430,7 @@ dependencies = [
 
 [[package]]
 name = "crate-redeem-in-kind"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -442,7 +442,7 @@ dependencies = [
 
 [[package]]
 name = "crate-token"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
