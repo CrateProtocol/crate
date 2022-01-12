@@ -14,11 +14,14 @@ impl<'info> Validate<'info> for NewCrate<'info> {
             self.crate_token,
             "crate_mint.mint_authority"
         );
-        assert_keys_eq!(
-            self.crate_mint.freeze_authority.unwrap(),
-            self.crate_token,
-            "crate_mint.mint_authority"
+
+        let freeze_authority = self.crate_mint.freeze_authority.unwrap();
+        invariant!(
+            freeze_authority == self.crate_token.key()
+                || freeze_authority == self.issue_authority.key(),
+            InvalidFreezeAuthority
         );
+
         invariant!(self.crate_mint.supply == 0, "supply must be zero");
         Ok(())
     }
