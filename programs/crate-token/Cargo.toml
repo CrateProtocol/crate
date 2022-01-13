@@ -23,5 +23,5 @@ default = []
 anchor-lang = ">=0.17.0"
 anchor-spl = ">=0.17.0"
 static-pubkey = "^1.0.2"
-vipers = "1.5.5"
+vipers = "1.5.7"
 num-traits = "0.2"
