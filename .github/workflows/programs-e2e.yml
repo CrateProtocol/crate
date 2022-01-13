@@ -35,10 +35,13 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v2
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
       - name: Yarn Cache
         uses: actions/cache@v2
         with:
-          path: ./.yarn
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-modules-
@@ -97,10 +100,13 @@ jobs:
       - name: Build program
         run: nix shell .#ci --command anchor build
 
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
       - name: Yarn Cache
         uses: actions/cache@v2
         with:
-          path: ./.yarn
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-modules-
