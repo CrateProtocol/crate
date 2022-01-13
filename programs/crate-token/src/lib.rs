@@ -393,6 +393,8 @@ pub struct Withdraw<'info> {
 pub enum ErrorCode {
     #[msg("Maximum fee exceeded.")]
     MaxFeeExceeded,
+    #[msg("Freeze authority must either be the issuer or the Crate itself.")]
+    InvalidFreezeAuthority,
 }
 
 #[cfg(test)]
