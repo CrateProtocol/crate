@@ -45,7 +45,7 @@ pub struct Fees {
     pub protocol_fee: u64,
 }
 
-fn apply_bps(amount: u64, bps: u16) -> Result<(u64, u64), ProgramError> {
+fn apply_bps(amount: u64, bps: u16) -> Result<(u64, u64)> {
     let bps = unwrap_int!((amount)
         .checked_mul(bps.into())
         .and_then(|v| v.checked_div(10_000))
@@ -55,7 +55,7 @@ fn apply_bps(amount: u64, bps: u16) -> Result<(u64, u64), ProgramError> {
 
 impl CrateToken {
     /// Applies the issuance fee.
-    pub fn apply_issue_fee(&self, amount: u64) -> Result<Fees, ProgramError> {
+    pub fn apply_issue_fee(&self, amount: u64) -> Result<Fees> {
         let (amount, issue_fee) = apply_bps(amount, self.issue_fee_bps)?;
         let (author_fee, protocol_fee) = apply_bps(issue_fee, crate::ISSUE_FEE_BPS)?;
         Ok(Fees {
@@ -66,7 +66,7 @@ impl CrateToken {
     }
 
     /// Applies the withdraw fee.
-    pub fn apply_withdraw_fee(&self, amount: u64) -> Result<Fees, ProgramError> {
+    pub fn apply_withdraw_fee(&self, amount: u64) -> Result<Fees> {
         let (amount, withdraw_fee) = apply_bps(amount, self.withdraw_fee_bps)?;
         let (author_fee, protocol_fee) = apply_bps(withdraw_fee, crate::WITHDRAW_FEE_BPS)?;
         Ok(Fees {

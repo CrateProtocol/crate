@@ -33,6 +33,8 @@ pub static WITHDRAW_AUTHORITY_SIGNER_SEEDS: &[&[&[u8]]] =
 /// [crate_redeem_in_kind] program.
 #[program]
 pub mod crate_redeem_in_kind {
+    use std::collections::BTreeMap;
+
     use super::*;
 
     /// Redeems Crate tokens for their underlying assets, in-kind.
@@ -42,7 +44,7 @@ pub mod crate_redeem_in_kind {
     pub fn redeem<'info>(
         ctx: Context<'_, '_, '_, 'info, Redeem<'info>>,
         amount: u64,
-    ) -> ProgramResult {
+    ) -> Result<()> {
         let burn = token::Burn {
             mint: ctx.accounts.crate_mint.to_account_info(),
             to: ctx.accounts.crate_source.to_account_info(),
@@ -71,10 +73,12 @@ pub mod crate_redeem_in_kind {
         for _i in 0..num_tokens {
             // none of these accounts need to be validated further, since
             // [crate_token::cpi::withdraw] already handles it.
+            let bumps = &mut BTreeMap::new();
             let asset: RedeemAsset = Accounts::try_accounts(
                 &crate::ID,
                 &mut next_account_infos(remaining_accounts_iter, 4)?,
                 &[],
+                bumps,
             )?;
 
             let share: u64 = unwrap_int!((asset.crate_underlying.amount as u128)

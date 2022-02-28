@@ -7,7 +7,7 @@ use crate::Redeem;
 use vipers::validate::Validate;
 
 impl<'info> Validate<'info> for Redeem<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         assert_keys_eq!(
             self.withdraw_authority,
             crate::WITHDRAW_AUTHORITY_ADDRESS,
