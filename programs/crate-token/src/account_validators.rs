@@ -8,7 +8,7 @@ use anchor_lang::Key;
 use vipers::validate::Validate;
 
 impl<'info> Validate<'info> for NewCrate<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         assert_keys_eq!(
             self.crate_mint.mint_authority.unwrap(),
             self.crate_token,
@@ -28,7 +28,7 @@ impl<'info> Validate<'info> for NewCrate<'info> {
 }
 
 impl<'info> Validate<'info> for SetFees<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         assert_keys_eq!(
             self.crate_token.fee_setter_authority,
             self.fee_setter,
@@ -39,7 +39,7 @@ impl<'info> Validate<'info> for SetFees<'info> {
 }
 
 impl<'info> Validate<'info> for SetFeeTo<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         assert_keys_eq!(
             self.crate_token.fee_to_setter,
             self.fee_to_setter,
@@ -50,7 +50,7 @@ impl<'info> Validate<'info> for SetFeeTo<'info> {
 }
 
 impl<'info> Validate<'info> for SetFeeToSetter<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         assert_keys_eq!(
             self.crate_token.fee_to_setter,
             self.fee_to_setter,
@@ -61,7 +61,7 @@ impl<'info> Validate<'info> for SetFeeToSetter<'info> {
 }
 
 impl<'info> Validate<'info> for Issue<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         assert_keys_eq!(
             self.crate_token.mint,
             self.crate_mint.key(),
@@ -108,7 +108,7 @@ impl<'info> Validate<'info> for Issue<'info> {
 }
 
 impl<'info> Validate<'info> for Withdraw<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         assert_keys_eq!(
             self.crate_underlying.owner,
             self.crate_token,

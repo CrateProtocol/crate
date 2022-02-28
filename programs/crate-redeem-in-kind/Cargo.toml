@@ -20,9 +20,9 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = ">=0.17.0"
-anchor-spl = ">=0.17.0"
+anchor-lang = "^0.22"
+anchor-spl = "^0.22"
 crate-token = { path = "../crate-token", version = "^0.4", features = ["cpi"] }
 static-pubkey = "^1.0.2"
-vipers = "1.5.9"
+vipers = "^2"
 num-traits = "0.2"

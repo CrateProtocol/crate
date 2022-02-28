@@ -12,7 +12,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program;
 use anchor_spl::token::{self, Mint, Token, TokenAccount};
 use static_pubkey::static_pubkey;
-use vipers::validate::Validate;
+use vipers::prelude::*;
 
 use events::*;
 pub use state::*;
@@ -38,10 +38,10 @@ pub mod crate_token {
 
     /// Provisions a new Crate.
     #[access_control(ctx.accounts.validate())]
-    pub fn new_crate(ctx: Context<NewCrate>, bump: u8) -> ProgramResult {
+    pub fn new_crate(ctx: Context<NewCrate>, _bump: u8) -> Result<()> {
         let info = &mut ctx.accounts.crate_token;
         info.mint = ctx.accounts.crate_mint.key();
-        info.bump = bump;
+        info.bump = unwrap_bump!(ctx, "crate_token");
 
         info.fee_to_setter = ctx.accounts.fee_to_setter.key();
         info.fee_setter_authority = ctx.accounts.fee_setter_authority.key();
@@ -64,8 +64,8 @@ pub mod crate_token {
     /// Set the issue fee.
     /// Only the `fee_setter_authority` can call this.
     #[access_control(ctx.accounts.validate())]
-    pub fn set_issue_fee(ctx: Context<SetFees>, issue_fee_bps: u16) -> ProgramResult {
-        require!(issue_fee_bps <= MAX_FEE_BPS, MaxFeeExceeded);
+    pub fn set_issue_fee(ctx: Context<SetFees>, issue_fee_bps: u16) -> Result<()> {
+        invariant!(issue_fee_bps <= MAX_FEE_BPS, MaxFeeExceeded);
         let crate_token = &mut ctx.accounts.crate_token;
         crate_token.issue_fee_bps = issue_fee_bps;
         Ok(())
@@ -74,8 +74,8 @@ pub mod crate_token {
     /// Set the withdraw fee.
     /// Only the `fee_setter_authority` can call this.
     #[access_control(ctx.accounts.validate())]
-    pub fn set_withdraw_fee(ctx: Context<SetFees>, withdraw_fee_bps: u16) -> ProgramResult {
-        require!(withdraw_fee_bps <= MAX_FEE_BPS, MaxFeeExceeded);
+    pub fn set_withdraw_fee(ctx: Context<SetFees>, withdraw_fee_bps: u16) -> Result<()> {
+        invariant!(withdraw_fee_bps <= MAX_FEE_BPS, MaxFeeExceeded);
         let crate_token = &mut ctx.accounts.crate_token;
         crate_token.withdraw_fee_bps = withdraw_fee_bps;
         Ok(())
@@ -84,7 +84,7 @@ pub mod crate_token {
     /// Set the next recipient of the fees.
     /// Only the `fee_to_setter` can call this.
     #[access_control(ctx.accounts.validate())]
-    pub fn set_fee_to(ctx: Context<SetFeeTo>) -> ProgramResult {
+    pub fn set_fee_to(ctx: Context<SetFeeTo>) -> Result<()> {
         let crate_token = &mut ctx.accounts.crate_token;
         crate_token.author_fee_to = ctx.accounts.author_fee_to.key();
         Ok(())
@@ -93,7 +93,7 @@ pub mod crate_token {
     /// Sets who can change who sets the fees.
     /// Only the `fee_to_setter` can call this.
     #[access_control(ctx.accounts.validate())]
-    pub fn set_fee_to_setter(ctx: Context<SetFeeToSetter>) -> ProgramResult {
+    pub fn set_fee_to_setter(ctx: Context<SetFeeToSetter>) -> Result<()> {
         let crate_token = &mut ctx.accounts.crate_token;
         crate_token.fee_to_setter = ctx.accounts.next_fee_to_setter.key();
         Ok(())
@@ -102,7 +102,7 @@ pub mod crate_token {
     /// Issues Crate tokens.
     /// Only the `issue_authority` can call this.
     #[access_control(ctx.accounts.validate())]
-    pub fn issue(ctx: Context<Issue>, amount: u64) -> ProgramResult {
+    pub fn issue(ctx: Context<Issue>, amount: u64) -> Result<()> {
         // Do nothing if there is a zero amount.
         if amount == 0 {
             return Ok(());
@@ -173,7 +173,7 @@ pub mod crate_token {
     /// Withdraws Crate tokens.
     /// Only the `withdraw_authority` can call this.
     #[access_control(ctx.accounts.validate())]
-    pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> ProgramResult {
+    pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
         // Do nothing if there is a zero amount.
         if amount == 0 {
             return Ok(());
@@ -252,7 +252,6 @@ pub mod crate_token {
 
 /// Accounts for [crate_token::new_crate].
 #[derive(Accounts)]
-#[instruction(bump: u8)]
 pub struct NewCrate<'info> {
     /// Information about the crate.
     #[account(
@@ -261,7 +260,7 @@ pub struct NewCrate<'info> {
             b"CrateToken".as_ref(),
             crate_mint.key().to_bytes().as_ref()
         ],
-        bump = bump,
+        bump,
         payer = payer
     )]
     pub crate_token: Account<'info, CrateToken>,
@@ -388,7 +387,7 @@ pub struct Withdraw<'info> {
     pub token_program: Program<'info, Token>,
 }
 
-#[error]
+#[error_code]
 /// Error codes.
 pub enum ErrorCode {
     #[msg("Maximum fee exceeded.")]
