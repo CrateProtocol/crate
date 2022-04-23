@@ -1,5 +1,6 @@
 { pkgs }:
-pkgs.mkShell {
+pkgs.stdenvNoCC.mkDerivation {
+  name = "devshell";
   nativeBuiltInputs = (pkgs.lib.optionals pkgs.stdenv.isDarwin [
     pkgs.darwin.apple_sdk.frameworks.AppKit
     pkgs.darwin.apple_sdk.frameworks.IOKit
@@ -8,7 +9,7 @@ pkgs.mkShell {
   buildInputs = with pkgs;
     (pkgs.lib.optionals pkgs.stdenv.isLinux ([
       # solana
-      libudev
+      udev
     ])) ++ [
       rustup
       cargo-deps
@@ -26,7 +27,7 @@ pkgs.mkShell {
 
       libiconv
 
-      anchor-0_19_0
+      anchor-0_24_2
       spl-token-cli
     ] ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
       pkgs.darwin.apple_sdk.frameworks.AppKit

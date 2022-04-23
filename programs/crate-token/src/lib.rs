@@ -261,6 +261,7 @@ pub struct NewCrate<'info> {
             crate_mint.key().to_bytes().as_ref()
         ],
         bump,
+        space = 8 + CrateToken::LEN,
         payer = payer
     )]
     pub crate_token: Account<'info, CrateToken>,
@@ -269,18 +270,23 @@ pub struct NewCrate<'info> {
     pub crate_mint: Account<'info, Mint>,
 
     /// The authority that can change who fees go to.
+    /// CHECK: Arbitrary input.
     pub fee_to_setter: UncheckedAccount<'info>,
 
     /// The authority that can set fees.
+    /// CHECK: Arbitrary input.
     pub fee_setter_authority: UncheckedAccount<'info>,
 
     /// The authority that can issue new [CrateToken] tokens.
+    /// CHECK: Arbitrary input.
     pub issue_authority: UncheckedAccount<'info>,
 
     /// The authority that can redeem the [CrateToken] token underlying.
+    /// CHECK: Arbitrary input.
     pub withdraw_authority: UncheckedAccount<'info>,
 
     /// Owner of the author fee accounts.
+    /// CHECK: Arbitrary input.
     pub author_fee_to: UncheckedAccount<'info>,
 
     /// Payer of the crate initialization.
@@ -313,6 +319,7 @@ pub struct SetFeeTo<'info> {
     /// Account that can set the fee recipient.
     pub fee_to_setter: Signer<'info>,
     /// Who the fees go to.
+    /// CHECK: Arbitrary input.
     pub author_fee_to: UncheckedAccount<'info>,
 }
 
@@ -326,6 +333,7 @@ pub struct SetFeeToSetter<'info> {
     /// Account that can set the fee recipient.
     pub fee_to_setter: Signer<'info>,
     /// Who will be able to change the fees next.
+    /// CHECK: Arbitrary input.
     pub next_fee_to_setter: UncheckedAccount<'info>,
 }
 

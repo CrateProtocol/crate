@@ -1,4 +1,4 @@
-use anchor_lang::prelude::*;
+use anchor_lang::{prelude::*, solana_program::pubkey::PUBKEY_BYTES};
 use num_traits::ToPrimitive;
 use vipers::unwrap_int;
 
@@ -34,6 +34,10 @@ pub struct CrateToken {
     /// The issuance fee in bps.
     /// [crate::WITHDRAW_FEE_BPS] of this fee goes to the Crate DAO.
     pub withdraw_fee_bps: u16,
+}
+
+impl CrateToken {
+    pub const LEN: usize = PUBKEY_BYTES + 1 + PUBKEY_BYTES * 5 + 2 + 2;
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord)]
@@ -74,5 +78,19 @@ impl CrateToken {
             author_fee,
             protocol_fee,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_crate_token_len() {
+        use crate::CrateToken;
+        assert_eq!(
+            CrateToken::LEN,
+            CrateToken::default().try_to_vec().unwrap().len()
+        );
     }
 }
