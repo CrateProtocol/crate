@@ -27,6 +27,7 @@ pkgs.stdenvNoCC.mkDerivation {
 
       libiconv
 
+      cargo-workspaces
       anchor-0_24_2
       spl-token-cli
     ] ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [

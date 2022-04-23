@@ -1,6 +1,6 @@
 {
   "name": "@crateprotocol/crate-sdk",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Fractional ownership of shared assets",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
