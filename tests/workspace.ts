@@ -1,4 +1,5 @@
 import * as anchor from "@project-serum/anchor";
+import { AnchorProvider } from "@project-serum/anchor";
 import { chaiSolana } from "@saberhq/chai-solana";
 import { SolanaProvider } from "@saberhq/solana-contrib";
 import chai from "chai";
@@ -7,7 +8,7 @@ import { CrateSDK } from "../src";
 
 chai.use(chaiSolana);
 
-const anchorProvider = anchor.Provider.env();
+const anchorProvider = AnchorProvider.env();
 anchor.setProvider(anchorProvider);
 
 const provider = SolanaProvider.load({

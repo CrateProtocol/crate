@@ -47,7 +47,7 @@ pub mod crate_redeem_in_kind {
     ) -> Result<()> {
         let burn = token::Burn {
             mint: ctx.accounts.crate_mint.to_account_info(),
-            to: ctx.accounts.crate_source.to_account_info(),
+            from: ctx.accounts.crate_source.to_account_info(),
             authority: ctx.accounts.owner.to_account_info(),
         };
 
@@ -122,9 +122,11 @@ pub mod crate_redeem_in_kind {
 #[derive(Accounts)]
 pub struct Redeem<'info> {
     /// The withdraw authority PDA.
+    /// CHECK: Arbitrary.
     pub withdraw_authority: UncheckedAccount<'info>,
 
     /// Information about the crate.
+    #[account(has_one = withdraw_authority)]
     pub crate_token: Account<'info, crate_token::CrateToken>,
 
     /// [Mint] of the [crate_token::CrateToken].
