@@ -22,6 +22,6 @@ default = []
 [dependencies]
 anchor-lang = "^0.24"
 anchor-spl = "^0.24"
-static-pubkey = "^1.0.2"
+static-pubkey = "^1.0.3"
 vipers = "^2"
 num-traits = "0.2"
