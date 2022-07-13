@@ -20,7 +20,7 @@
     "@rushstack/eslint-patch": "^1.1.3",
     "@saberhq/anchor-contrib": "^1.12.65",
     "@saberhq/chai-solana": "^1.12.65",
-    "@saberhq/eslint-config": "^1.12.65",
+    "@saberhq/eslint-config": "^2.0.2",
     "@saberhq/solana-contrib": "^1.12.65",
     "@saberhq/token-utils": "^1.12.65",
     "@saberhq/tsconfig": "^1.12.65",
