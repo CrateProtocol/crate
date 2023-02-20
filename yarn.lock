@@ -197,7 +197,7 @@ __metadata:
     "@solana/web3.js": ^1.39.1
     "@types/bn.js": ^5.1.0
     "@types/mocha": ^9.1.1
-    "@types/node": ^16.11.27
+    "@types/node": ^18.14.0
     "@types/prettier": ^2.6.0
     "@yarnpkg/doctor": ^4.0.0-rc.2
     bn.js: ^5.2.0
@@ -1785,10 +1785,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^16.11.27":
-  version: 16.11.27
-  resolution: "@types/node@npm:16.11.27"
-  checksum: 6ed0c8c4d29a549d0cfd607d19edf9a4668fbd39087701d923b4a04cd760564e47ad27f9403968cb9c11ee006f0ea6ab698b2491b4b2d2dec3f4a53d0fc22df7
+"@types/node@npm:^18.14.0":
+  version: 18.14.0
+  resolution: "@types/node@npm:18.14.0"
+  checksum: d83fcf5e4ed544755dd9028f5cbb6b9d46235043159111bb2ad62223729aee581c0144a9f6df8ba73d74011db9ed4ebd7af2fd5e0996714e3beb508a5da8ac5c
   languageName: node
   linkType: hard
 
